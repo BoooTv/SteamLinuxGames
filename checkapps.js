@@ -1,21 +1,15 @@
 const request = require("request");
 const fs = require("fs");
+const throttledQ = require("throttled-queue");
+let throttled = throttledQ(1, 1000);
 
 async function start() {
   let apps = await getAppID();
-  console.log(apps);
-  // let apps = [440, 730];
-  // apps.forEach(appid => {
-  //   check(appid);
-  // });
-  // await console.log(apps.applist.apps);
   await apps.applist.apps.forEach(app => {
-    check(app["appid"]);
-    console.log(app);
+    throttled(function() {
+      check(app["appid"]);
+    });
   });
-  // console.log(app);
-  // check(app.appid);
-  // });
 }
 
 function writeGAMES(id) {
@@ -40,12 +34,15 @@ function check(id) {
   request(
     "https://store.steampowered.com/api/appdetails?appids=" + id,
     (err, response, body) => {
-      // console.log(response);
       if (!err) {
-        let res = JSON.parse(body);
+        try {
+          let res = JSON.parse(body);
+        } catch (error) {
+          console.log(error);
+          console.log(body);
+          process.exit(1);
+        }
         if (typeof res === "object") {
-          // console.log(body);
-          // console.log(res[id]);
           if (res[id].success === true) {
             let linux = res[id].data.platforms.linux;
             if (linux === true) {
