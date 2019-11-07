@@ -1,7 +1,7 @@
 const request = require("request");
 const fs = require("fs");
 const throttledQ = require("throttled-queue");
-let throttled = throttledQ(1, 1000);
+let throttled = throttledQ(10, 1000);
 
 async function start() {
   let apps = await getAppID();
@@ -37,21 +37,18 @@ function check(id) {
       if (!err) {
         try {
           let res = JSON.parse(body);
+          if (typeof res === "object") {
+            if (res[id].success === true) {
+              let linux = res[id].data.platforms.linux;
+              if (linux === true) {
+                console.log(id + " is supported on linux");
+                writeGAMES(id);
+              }
+            }
+          }
         } catch (error) {
           console.log(error);
           console.log(body);
-          process.exit(1);
-        }
-        if (typeof res === "object") {
-          if (res[id].success === true) {
-            let linux = res[id].data.platforms.linux;
-            if (linux === true) {
-              console.log(id + " is supported on linux");
-              writeGAMES(id);
-            }
-          }
-        } else {
-          console.log("Something went wrong. res not json");
           process.exit(1);
         }
       } else {
