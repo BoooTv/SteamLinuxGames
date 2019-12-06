@@ -1,11 +1,13 @@
 SteamLinuxGames
 
-This was made when I was very tired. Now looking back at it and reading the API docs I realize this can be done a lot better. So I will start rework it.
+List off all games that support linux
 
 ```bash
-npm start
+python3 checker.py
 ```
+This is the best way off checking using the steam api as the Store api has a few issues
 
+The time.sleep is so the api does not block your ip
 
 Made by
 @BoooTv
